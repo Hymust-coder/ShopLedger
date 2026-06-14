@@ -1,7 +1,7 @@
 ShopLedger — OPay NICA 2026 🛒
 
 🚀 Live Interactive App URL:
-👉 ( https://github.com/Hymust-coder/ShopLedger.git )
+👉 [LAUNCH SHOPLEDGER LIVE PROTOTYPE](https://Hymust-coder.github.io/ShopLedger/) 
 
 📌 Project Overview
 ShopLedger is a voice-powered AI bookkeeping application designed specifically for micro-traders and MSMEs within Nigeria's informal market spaces. Developed by Team Unique-UNIMAID (University of Maiduguri) for the OPay National Innovation Challenge 2026, this platform allows informal merchants to seamlessly track transactions using native speech pattern logic (Hausa, Yoruba, Igbo, or English) to remove barriers to financial inclusion.
