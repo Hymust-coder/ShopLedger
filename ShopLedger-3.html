@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>ShopLedger — OPay NICA 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',Roboto,sans-serif;background:#F2F6F8;color:#003049;min-height:100vh}
+#app{max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:70px}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#003049,#00535E);padding:14px 16px;color:#fff;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:0 2px 16px rgba(0,0,0,.2)}
+.hdr-logo{width:36px;height:36px;background:#00A896;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hdr-title{font-size:19px;font-weight:800}
+.hdr-sub{font-size:9px;color:#E0F5F3;opacity:.9}
+.hdr-opay{margin-left:auto;background:#00C853;color:#fff;border:none;border-radius:9px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid #D4E4E9;display:flex;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.nb{flex:1;border:none;background:none;padding:8px 0 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nb-icon{font-size:17px}
+.nb-lbl{font-size:9px;color:#8A9BB0;font-weight:500}
+.nb.on .nb-lbl{color:#00A896;font-weight:800}
+.nb-dot{height:2.5px;width:0;background:#00A896;border-radius:2px;margin-top:2px;transition:width .3s}
+.nb.on .nb-dot{width:18px}
+
+/* PAGES */
+.pg{display:none;padding:14px;animation:fadeUp .25s ease}
+.pg.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.card-lg{background:#fff;border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 2px 18px rgba(0,0,0,.07)}
+
+/* LANGUAGE BAR */
+.lang-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.lang-bar::-webkit-scrollbar{display:none}
+.lb{border:1.5px solid #D4E4E9;background:#fff;color:#8A9BB0;border-radius:20px;padding:5px 13px;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
+.lb.on{background:#00A896;color:#fff;border-color:#00A896}
+
+/* MIC */
+.mic-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}
+.mic-btn{width:106px;height:106px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:38px;cursor:pointer;transition:all .3s}
+.mic-btn.idle{background:radial-gradient(circle,#00A896 50%,#00C9B1 100%);box-shadow:0 0 0 12px rgba(0,168,150,.12),0 8px 28px rgba(0,168,150,.3)}
+.mic-btn.rec{background:radial-gradient(circle,#E63946 50%,#FF6B7A 100%);box-shadow:0 0 0 14px rgba(230,57,70,.14),0 0 0 28px rgba(230,57,70,.06);animation:mp .9s ease-in-out infinite}
+.mic-btn.proc{background:radial-gradient(circle,#F4A261 50%,#FFCC80 100%);box-shadow:0 0 0 12px rgba(244,162,97,.15)}
+@keyframes mp{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.mic-label{font-size:13px;font-weight:700;margin-top:11px;min-height:18px;transition:color .2s;text-align:center}
+.mic-hint{font-size:11px;color:#F4A261;font-weight:700;margin-top:4px;min-height:16px;text-align:center}
+
+/* WAVES */
+.waves{display:flex;align-items:center;justify-content:center;gap:3px;height:26px;margin:6px 0}
+.wv{width:4px;border-radius:4px;background:#00A896;height:4px}
+@keyframes wv{from{height:4px}to{height:22px}}
+
+/* TRANSCRIPT */
+.tx-box{background:#F2F6F8;border-radius:12px;padding:12px 14px;margin:10px 0;border:1.5px solid #00A896;font-size:14px;line-height:1.6;min-height:52px;color:#003049;word-break:break-word}
+.tx-label{font-size:10px;color:#00A896;font-weight:800;display:block;margin-bottom:4px}
+.cursor{display:inline-block;width:2px;height:15px;background:#00A896;margin-left:2px;vertical-align:middle;animation:blink .7s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* BUTTONS */
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-family:inherit}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn-teal{background:#00A896;color:#fff}
+.btn-dark{background:#003049;color:#fff}
+.btn-outline{background:transparent;color:#8A9BB0;border:1.5px solid #D4E4E9}
+.btn-opay{background:#00C853;color:#fff}
+.btn:disabled{background:#D4E4E9;color:#aaa;cursor:not-allowed;transform:none}
+
+/* EXAMPLES */
+.ex-item{background:#F2F6F8;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;cursor:pointer;border:1px solid #D4E4E9;display:flex;align-items:flex-start;gap:8px}
+.ex-item:active{background:#E0F5F3}
+
+/* RESULT CARD */
+.res-card{border-radius:14px;padding:14px 16px;margin-bottom:14px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.res-row{display:flex;justify-content:space-between;align-items:flex-start}
+.res-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A9BB0}
+.res-desc{font-size:16px;font-weight:700;margin-top:2px;word-break:break-word}
+.res-cat{font-size:12px;color:#8A9BB0;margin-top:2px}
+.res-amt{font-size:22px;font-weight:900;flex-shrink:0;margin-left:10px;white-space:nowrap}
+.res-hausa{margin-top:10px;background:#F2F6F8;border-radius:10px;padding:8px 12px;font-size:13px;font-style:italic}
+
+/* STATS */
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-box{background:#fff;border-radius:12px;padding:12px 8px;text-align:center;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.stat-lbl{font-size:10px;color:#8A9BB0;font-weight:700;text-transform:uppercase}
+.stat-val{font-size:15px;font-weight:900;margin-top:3px}
+
+/* LEDGER ITEMS */
+.tx-item{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:10px;box-shadow:0 1px 8px rgba(0,0,0,.06);border-left:4px solid #D4E4E9}
+.tx-item.inc{border-left-color:#2DC653}
+.tx-item.exp{border-left-color:#E63946}
+.tx-row{display:flex;justify-content:space-between;align-items:flex-start}
+.tx-desc{font-size:14px;font-weight:700;word-break:break-word}
+.tx-meta{font-size:11px;color:#8A9BB0;margin-top:2px}
+.tx-raw{font-size:11px;color:#8A9BB0;margin-top:6px;font-style:italic}
+.tx-amt{font-size:17px;font-weight:900;flex-shrink:0;margin-left:8px;white-space:nowrap}
+
+/* BAR CHART */
+.chart-wrap{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.bar-lbl{font-size:11px;color:#8A9BB0;width:82px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:#F2F6F8;border-radius:20px;height:18px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;background:#00A896;transition:width 1s ease}
+.bar-val{font-size:11px;font-weight:700;width:62px;text-align:right;flex-shrink:0;white-space:nowrap}
+
+/* OPAY BANNER */
+.opay-banner{background:linear-gradient(135deg,#007B2E,#00C853);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.opay-open{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.5);border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+
+/* LOAN CARD */
+.loan-card{border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 16px rgba(0,0,0,.1)}
+.loan-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.loan-bar-track{background:rgba(255,255,255,.2);border-radius:20px;height:8px}
+.loan-bar-fill{height:100%;border-radius:20px;background:#fff;transition:width 1s}
+
+/* INFO BOXES */
+.info-box{background:#E0F5F3;border-radius:14px;padding:14px;border:1px solid #00A896;margin-bottom:12px}
+.warn-box{background:#FFF3CD;border:1.5px solid #F4A261;border-radius:14px;padding:14px;margin-bottom:14px;font-size:13px;text-align:center;color:#7A4F00}
+
+/* CALC */
+.calc-lbl{font-size:12px;font-weight:700;color:#8A9BB0;margin-bottom:6px;display:block;text-transform:uppercase}
+.calc-inp{width:100%;border:1.5px solid #D4E4E9;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:700;color:#003049;background:#fff;font-family:inherit;margin-bottom:14px}
+.calc-inp:focus{outline:none;border-color:#00A896}
+.calc-res{background:#E0F5F3;border-radius:14px;padding:16px;border:1px solid #00A896;margin-top:10px;display:none}
+.calc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.calc-row:last-child{margin-bottom:0;padding-top:8px;border-top:1px solid #00A896}
+
+/* OPAY SERVICES */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.svc-box{background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);text-align:center;cursor:pointer;border:1.5px solid #D4E4E9}
+.svc-box:active{background:#F2F6F8}
+.svc-icon{font-size:28px;margin-bottom:6px}
+.svc-title{font-size:13px;font-weight:800}
+.svc-desc{font-size:11px;color:#8A9BB0;margin-top:2px}
+
+/* TELEPROMPTER */
+.seg-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:none}
+.seg-bar::-webkit-scrollbar{display:none}
+.seg-btn{white-space:nowrap;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;border:1.5px solid #D4E4E9;background:#fff;color:#003049;font-family:inherit}
+.seg-btn.on{background:#003049;color:#fff;border-color:#003049}
+.prompter{background:#003049;border-radius:18px;padding:18px;margin-bottom:12px;min-height:200px;display:flex;flex-direction:column;justify-content:center}
+.p-line{padding:6px 0;text-align:center;transition:all .3s;line-height:1.4}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.prog-track{flex:1;background:#D4E4E9;border-radius:20px;height:6px}
+.prog-fill{background:#00A896;height:100%;border-radius:20px;transition:width .3s}
+.ctrl-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.ctrl-btn{border-radius:12px;padding:12px;font-size:20px;cursor:pointer;border:none;font-family:inherit}
+.spd-row{display:flex;gap:8px}
+.spd-btn{flex:1;border-radius:10px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid #D4E4E9;background:#F2F6F8;color:#003049;font-family:inherit}
+.spd-btn.on{background:#00A896;color:#fff;border-color:#00A896}
+
+/* PRESENTATION */
+#pres{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;background:#000}
+#pres.show{display:flex}
+.slide-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;padding:20px;transition:opacity .22s}
+.slide-area.fade{opacity:0}
+.dots-row{background:rgba(0,0,0,.7);padding:8px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.dot{height:8px;border-radius:8px;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.25)}
+.dot.on{background:#00A896}
+.pres-ctrl{background:#111;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.pres-ctrl button{border:none;border-radius:10px;font-weight:700;cursor:pointer;padding:10px;font-family:inherit}
+
+/* SLIDE HELPERS */
+.sc{text-align:center;padding:0 22px;width:100%}
+.sl{padding:0 20px;width:100%}
+.s-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.s-title{font-size:27px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:14px}
+.s-step{display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
+.s-step-num{width:32px;height:32px;border-radius:50%;background:#00A896;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;flex-shrink:0}
+.s-step-body{background:rgba(255,255,255,.07);border-radius:12px;padding:10px 14px;flex:1}
+.s-step-title{font-size:14px;font-weight:800;color:#fff}
+.s-step-desc{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.s-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.s-stat-box{background:rgba(255,255,255,.07);border-radius:14px;padding:13px 10px;text-align:center}
+.s-stat-val{font-size:23px;font-weight:900}
+.s-stat-lbl{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px}
+.s-svc{display:flex;gap:10px;text-align:left;margin-bottom:10px;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px}
+.s-team-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:9px 14px;margin-bottom:7px}
+.s-check{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:7px;display:flex;gap:7px}
+
+/* TOAST */
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);color:#fff;padding:10px 22px;border-radius:24px;z-index:9998;font-weight:700;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,.25);white-space:nowrap;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* EMPTY */
+.empty{text-align:center;padding:56px 20px;color:#8A9BB0}
+.empty-icon{font-size:46px;margin-bottom:12px}
+
+/* SECTION TITLE */
+.sec-title{font-size:18px;font-weight:800;margin-bottom:14px}
+
+/* MISC */
+.divider{height:1px;background:#D4E4E9;margin:12px 0}
+.tips-box{background:#E0F5F3;border-radius:14px;padding:14px;border:1px solid #00A896}
+.tips-title{font-size:12px;font-weight:800;color:#00A896;margin-bottom:8px}
+.tip-row{font-size:12px;margin-bottom:6px;display:flex;gap:6px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-logo">🛒</div>
+    <div><div class="hdr-title">ShopLedger</div><div class="hdr-sub">Gemini AI • Canva • OPay</div></div>
+    <button class="hdr-opay" onclick="opayGo()">🏦 OPay</button>
+  </div>
+
+  <div class="pg on" id="pg-home"></div>
+  <div class="pg" id="pg-ledger"></div>
+  <div class="pg" id="pg-stock"></div>
+  <div class="pg" id="pg-report"></div>
+  <div class="pg" id="pg-more"></div>
+
+  <nav class="nav">
+    <button class="nb on" id="nb-home" onclick="goTab('home')"><span class="nb-icon">🎙️</span><span class="nb-lbl">Record</span><div class="nb-dot"></div></button>
+    <button class="nb" id="nb-ledger" onclick="goTab('ledger')"><span class="nb-icon">📒</span><span class="nb-lbl">Ledger</span><div class="nb-dot"></div></button>
+    <button class="nb" id="nb-stock" onclick="goTab('stock')"><span class="nb-icon">📦</span><span class="nb-lbl">Stock</span><div class="nb-dot"></div></button>
+    <button class="nb" id="nb-report" onclick="goTab('report')"><span class="nb-icon">📊</span><span class="nb-lbl">Report</span><div class="nb-dot"></div></button>
+    <button class="nb" id="nb-more" onclick="goTab('more')"><span class="nb-icon">⋯</span><span class="nb-lbl">More</span><div class="nb-dot"></div></button>
+  </nav>
+</div>
+
+<div id="pres">
+  <div class="slide-area" id="slide-body"></div>
+  <div class="dots-row" id="slide-dots"></div>
+  <div class="pres-ctrl" id="pres-ctrl"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* === DATA === */
+var txns = JSON.parse(localStorage.getItem('sl_tx') || '[]');
+var stock = JSON.parse(localStorage.getItem('sl_stock') || '[]');
+var settings = JSON.parse(localStorage.getItem('sl_set') || '{"lang":"en-NG"}');
+var report = null;
+var lastTx = null;
+var recognition = null;
+var voiceState = 'idle';
+var liveText = '';
+var finalText = '';
+var tab = 'home';
+var slideIdx = 0;
+var slideFade = false;
+var scriptSeg = 0;
+var scriptLine = 0;
+var scriptRun = false;
+var scriptSpeed = 3500;
+var scriptTimer = null;
+
+var LANGS = [{code:'en-NG',lbl:'English'},{code:'ha',lbl:'Hausa'},{code:'yo-NG',lbl:'Yoruba'},{code:'ig-NG',lbl:'Igbo'}];
+
+var EXAMPLES = [
+  'I sold 3 bags of rice for 15,000 naira',
+  'Na sayar da jakunkuna uku — Naira dubu goma sha biyar',
+  'Sold 10 yards of fabric for 5,000 naira',
+  'Customer paid 22,000 naira for groundnut oil',
+  'Bought stock worth 8,500 naira',
+  'Transport cost me 1,200 naira today',
+  'Sold 5 crates of eggs for 18,500 naira',
+  'Spent 3,000 naira on shop rent'
+];
+
+var HAUSA_OK = [
+  'Sannu da aiki! An yi rijistar cinikayya.',
+  'Alhamdulillah! An lura da kudaden ka.',
+  'ShopLedger ya rubuta bayanan ka.',
+  'An kiyaye rikodin ka! Ci gaba.'
+];
+var ENG_OK = [
+  'Transaction recorded successfully!',
+  'Great work! Your sale has been logged.',
+  'ShopLedger has saved your record.',
+  'Keep recording to unlock OPay loans!'
+];
+
+var SCRIPTS = [
+  {time:'0:00-0:30',lbl:'HOOK',lines:['Meet Hajiya Fatima.','She runs a grain business in Maiduguri Monday Market.','Every day she sells thousands of naira worth of goods.','But tonight, when her son asks how much profit she made...','She cannot answer.','She is not alone.','39 million Nigerians run businesses with no financial records.','Banks say no. Loans are impossible. Growth is blocked.','We asked: what if her VOICE was her ledger?']},
+  {time:'0:30-1:30',lbl:'SOLUTION',lines:['Introducing ShopLedger —','the voice-powered bookkeeping app for Nigerian traders.','A trader speaks — in Hausa, Yoruba, Igbo, or English.','AI processes the voice, classifies the transaction, updates stock.','ShopLedger and Canva auto-generate a professional P&L report.','When she has 90 days of records —','ShopLedger connects her to OPay for a micro-loan.','For the first time, Fatima has proof. She can grow.']},
+  {time:'1:30-2:15',lbl:'IMPACT',lines:['ShopLedger is not just an app.','It is a financial identity for people who never had one.','Nigeria informal sector is worth 28 trillion naira a year.','It employs 80% of our workforce.','Yet invisible to every bank, every loan, every opportunity.','Year 1: 50,000 traders across Maiduguri, Kano, and Lagos.','Goal: 500 million naira in micro-loans facilitated.','A model for 400 million informal traders across Africa.']},
+  {time:'2:15-2:40',lbl:'TEAM',lines:['We are Team Unique-UNIMAID — University of Maiduguri.','Five students. Five disciplines. One mission.','Ibrahim, Abubakar, Abdulrahman, Aminat, Khadijah.','We built ShopLedger because we watched this problem daily.','We are not building FOR Nigerians.','We ARE Nigerians building for ourselves.']},
+  {time:'2:40-3:00',lbl:'CLOSE',lines:['Hajiya Fatima deserves to know her numbers.','Her business deserves to grow.','39 million traders like her deserve a chance.','ShopLedger.','Her voice. Her ledger. Her future.']}
+];
+
+/* === UTILS === */
+function rand(a){return a[Math.floor(Math.random()*a.length)];}
+function fmt(n){return Number(n||0).toLocaleString('en-NG');}
+function fmtN(n){return '\u20a6'+fmt(n);}
+function dateStr(){return new Date().toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'});}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function save(){localStorage.setItem('sl_tx',JSON.stringify(txns));localStorage.setItem('sl_stock',JSON.stringify(stock));localStorage.setItem('sl_set',JSON.stringify(settings));}
+
+var toastTimer;
+function toast(msg,col){
+  col=col||'#00A896';
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=col;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},3500);
+}
+
+/* === OPAY === */
+function opayGo(path){
+  path=path||'';
+  var f=document.createElement('iframe');
+  f.style.cssText='display:none;width:0;height:0;border:none';
+  f.src='opay://'+path;
+  document.body.appendChild(f);
+  setTimeout(function(){f.remove();window.open('https://play.google.com/store/apps/details?id=team.opay.pay','_blank');},1500);
+}
+
+/* === AI PROCESSOR === */
+function process(text){
+  var t=text.toLowerCase();
+  var inc=['sold','sell','received','earned','sayar','sale','paid me','customer','got','na sami','na sayar','sami'];
+  var exp=['bought','buy','spent','paid','cost','transport','rent','sayi','expense','fee','na biya','na saya'];
+  var isInc=inc.some(function(w){return t.indexOf(w)>=0;});
+  var isExp=!isInc&&exp.some(function(w){return t.indexOf(w)>=0;});
+  var type=isInc?'INCOME':isExp?'EXPENSE':'INCOME';
+  var nums=(text.match(/[\d,]+(?:\.\d+)?/g)||[]).map(function(n){return parseFloat(n.replace(/,/g,''));}).filter(function(n){return n>100&&n<50000000;});
+  var amount=nums.length?Math.max.apply(null,nums):0;
+  var catMap={rice:'Rice Sales',grain:'Grain Sales',beans:'Beans',shinkafa:'Rice Sales',wake:'Beans',fabric:'Fabric',yadi:'Fabric',cloth:'Cloth',egg:'Eggs',oil:'Oil',tomato:'Tomatoes',fish:'Fish',meat:'Meat',transport:'Transport',fuel:'Fuel',rent:'Rent',stock:'Stock Purchase',bread:'Bread',food:'Food',groundnut:'Groundnut',onion:'Onion',water:'Water'};
+  var cat=type==='INCOME'?'General Sales':'General Expense';
+  Object.keys(catMap).forEach(function(k){if(t.indexOf(k)>=0)cat=catMap[k];});
+  updateStock(cat,type,amount);
+  return{type:type,cat:cat,amount:amount,desc:text.length>48?text.slice(0,48)+'...':text,raw:text,conf:amount>0?'HIGH':'MEDIUM',hr:rand(HAUSA_OK),er:rand(ENG_OK),date:dateStr(),id:Date.now()};
+}
+
+function updateStock(cat,type,amount){
+  var i=stock.findIndex(function(s){return s.cat===cat;});
+  if(type==='INCOME'){if(i>=0){stock[i].rev=(stock[i].rev||0)+amount;stock[i].sold=(stock[i].sold||0)+1;}}
+  else{if(i>=0){stock[i].cost=(stock[i].cost||0)+amount;}else{stock.push({cat:cat,qty:0,rev:0,cost:amount,sold:0,added:dateStr()});}}
+  save();
+}
+
+function buildReport(){
+  var inc=txns.filter(function(t){return t.type==='INCOME';}).reduce(function(s,t){return s+t.amount;},0);
+  var exp=txns.filter(function(t){return t.type==='EXPENSE';}).reduce(function(s,t){return s+t.amount;},0);
+  var cats={};
+  txns.forEach(function(t){cats[t.cat]=(cats[t.cat]||0)+t.amount;});
+  var score=clamp(Math.floor(txns.length*7+(inc-exp>0?20:0)+(inc>10000?15:0)),0,100);
+  var tips=['Record daily to improve your loan score.','Focus on your top-selling category.','Reduce expenses to maximise profit.','90 days of records unlocks bigger OPay loans.'];
+  var hausa=['Kasuwancin ka na tafiya lafiya! Ci gaba.','Ka yi aiki mai kyau — rikodin ka zai taimaka.','ShopLedger yana gina tarihin kasuwancin ka.'];
+  return{inc:inc,exp:exp,profit:inc-exp,margin:inc>0?Math.round(((inc-exp)/inc)*100):0,score:score,elig:score>=50,loan:score>=50?Math.floor(inc*2.5/1000)*1000:0,cats:cats,advice:rand(tips),hausa:rand(hausa)};
+}
+
+/* === VOICE === */
+function hasSpeech(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition);}
+
+function startVoice(){
+  if(voiceState==='processing')return;
+  if(voiceState==='listening'){stopVoice();return;}
+  if(!hasSpeech()){voiceState='unsupported';renderHome();return;}
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var r=new SR();
+  r.lang=settings.lang;r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
+  finalText='';liveText='';
+  r.onstart=function(){voiceState='listening';renderHome();};
+  r.onresult=function(e){
+    var fin='',inter='';
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript+' ';
+      else inter+=e.results[i][0].transcript;
+    }
+    finalText+=fin;liveText=(finalText+inter).trim();
+    updateTxDisplay();
+  };
+  r.onerror=function(e){
+    if(e.error==='not-allowed')voiceState='denied';
+    else voiceState='idle';
+    renderHome();
+  };
+  r.onend=function(){if(voiceState==='listening'){voiceState='idle';renderHome();}};
+  try{r.start();recognition=r;}catch(e){voiceState='idle';toast('Could not start mic','#E63946');renderHome();}
+}
+
+function stopVoice(){if(recognition){try{recognition.stop();}catch(e){}}voiceState='idle';renderHome();}
+
+function updateTxDisplay(){
+  var el=document.getElementById('live-tx');
+  if(!el)return;
+  el.innerHTML='<span class="tx-label">RECORDING:</span>'+esc(liveText)+(voiceState==='listening'?'<span class="cursor"></span>':'');
+  var sb=document.getElementById('save-btn');
+  if(sb)sb.style.display=liveText&&voiceState!=='listening'?'flex':'none';
+  var cb=document.getElementById('clr-btn');
+  if(cb)cb.style.display=liveText&&voiceState!=='listening'?'flex':'none';
+}
+
+function saveTx(){
+  var t=liveText.trim();
+  if(!t){toast('Nothing to save','#F4A261');return;}
+  doProcess(t);
+}
+
+function doProcess(text){
+  voiceState='processing';liveText='';finalText='';renderHome();
+  setTimeout(function(){
+    var r=process(text);
+    txns.unshift(r);save();
+    lastTx=r;voiceState='idle';liveText='';finalText='';
+    toast(r.er,'#00A896');renderHome();
+  },900);
+}
+
+function clearVoice(){liveText='';finalText='';renderHome();}
+function setLang(code){settings.lang=code;save();renderHome();}
+
+/* === TABS === */
+function goTab(t){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pg-'+t).classList.add('on');
+  document.getElementById('nb-'+t).classList.add('on');
+  tab=t;
+  var map={home:renderHome,ledger:renderLedger,stock:renderStock,report:renderReport,more:renderMore};
+  if(map[t])map[t]();
+}
+
+/* === RENDER HOME === */
+function renderHome(){
+  var p=document.getElementById('pg-home');
+  if(!p)return;
+  var lang=settings.lang;
+  var vs=voiceState;
+
+  var lastHTML='';
+  if(lastTx){
+    var lr=lastTx;
+    var col=lr.type==='INCOME'?'#2DC653':'#E63946';
+    var sign=lr.type==='INCOME'?'+':'-';
+    lastHTML='<div class="res-card" style="border-left:4px solid '+col+'">'
+      +'<div class="res-row">'
+      +'<div style="flex:1;min-width:0"><div class="res-type">'+lr.type+' SAVED &#x2705;</div>'
+      +'<div class="res-desc">'+esc(lr.desc)+'</div>'
+      +'<div class="res-cat">'+esc(lr.cat)+' &bull; '+esc(lr.date)+'</div></div>'
+      +'<div class="res-amt" style="color:'+col+'">'+sign+''+fmtN(lr.amount)+'</div>'
+      +'</div>'
+      +'<div class="res-hausa">&#x1F1F3;&#x1F1EC; '+esc(lr.hr)+'</div>'
+      +'</div>';
+  }
+
+  var warnHTML='';
+  if(vs==='denied'){
+    warnHTML='<div class="warn-box"><strong>&#x1F399; Microphone Denied</strong><br>Open Chrome Settings &rarr; Site Settings &rarr; Microphone &rarr; Allow this site</div>';
+  } else if(vs==='unsupported'){
+    warnHTML='<div class="warn-box"><strong>&#x26A0; Open in Google Chrome</strong><br>Voice recording requires Chrome browser. Use the examples below instead.</div>';
+  }
+
+  var langBtns=LANGS.map(function(l){
+    return '<button class="lb'+(lang===l.code?' on':'')+'" onclick="setLang(\''+l.code+'\')">'+l.lbl+'</button>';
+  }).join('');
+
+  var micClass='mic-btn '+(vs==='listening'?'rec':vs==='processing'?'proc':'idle');
+  var micIcon=vs==='listening'?'&#x23F9;':vs==='processing'?'&#x2699;':'&#x1F399;';
+  var micLabel=vs==='listening'?'Tap to stop recording':vs==='processing'?'Processing...':'Tap mic to start recording';
+  var micLabelCol=vs==='listening'?'#E63946':vs==='processing'?'#F4A261':'#8A9BB0';
+  var micHint=vs==='listening'?'Speak your transaction clearly...':'Hausa &bull; Yoruba &bull; Igbo &bull; English';
+
+  var wavesHTML=vs==='listening'
+    ?'<div class="waves"><div class="wv" style="animation:wv .45s ease-in-out infinite alternate"></div><div class="wv" style="animation:wv .38s ease-in-out infinite alternate;animation-delay:.07s"></div><div class="wv" style="animation:wv .52s ease-in-out infinite alternate;animation-delay:.14s"></div><div class="wv" style="animation:wv .41s ease-in-out infinite alternate;animation-delay:.21s"></div><div class="wv" style="animation:wv .48s ease-in-out infinite alternate;animation-delay:.28s"></div><div class="wv" style="animation:wv .36s ease-in-out infinite alternate;animation-delay:.35s"></div><div class="wv" style="animation:wv .55s ease-in-out infinite alternate;animation-delay:.1s"></div></div>'
+    :'<div style="height:26px;margin:6px 0"></div>';
+
+  var txArea='';
+  if(liveText||vs==='listening'){
+    txArea='<div class="tx-box" id="live-tx"><span class="tx-label">RECORDING:</span>'+esc(liveText)+(vs==='listening'?'<span class="cursor"></span>':'')+'</div>'
+      +'<button id="save-btn" class="btn btn-teal" style="display:'+(liveText&&vs!=='listening'?'flex':'none')+'" onclick="saveTx()">&#x2705; Save Transaction</button>'
+      +'<button id="clr-btn" class="btn btn-outline" style="display:'+(liveText&&vs!=='listening'?'flex':'none')+'" onclick="clearVoice()">&#x1F5D1; Clear &amp; Re-record</button>';
+  }
+
+  var procHTML=vs==='processing'?'<div style="text-align:center;padding:14px;color:#00A896;font-weight:700"><span style="display:inline-block;animation:spin 1s linear infinite">&#x2699;</span> AI processing...</div>':'';
+
+  var exHTML=EXAMPLES.slice(0,5).map(function(ex){
+    var safe=ex.replace(/'/g,"\\'");
+    return '<div class="ex-item" onclick="doProcess(\''+safe+'\')"><span>&#x1F4AC;</span><span>'+esc(ex)+'</span></div>';
+  }).join('');
+
+  var txCount=txns.length;
+  var rptBtn='<button class="btn btn-dark" '+(txCount===0?'disabled':'')+' onclick="doReport()" style="margin-top:0">&#x1F4CA; Generate Weekly Report ('+txCount+' records)</button>';
+
+  p.innerHTML=lastHTML+warnHTML
+    +'<div class="card-lg">'
+    +'<div style="text-align:center;font-size:13px;color:#8A9BB0;margin-bottom:4px">Tap mic &mdash; speak your transaction</div>'
+    +'<div class="lang-bar">'+langBtns+'</div>'
+    +'<div class="mic-wrap">'
+    +'<button class="'+micClass+'" onclick="startVoice()" aria-label="Voice Record">'+micIcon+'</button>'
+    +wavesHTML
+    +'<div class="mic-label" style="color:'+micLabelCol+'">'+micLabel+'</div>'
+    +'<div class="mic-hint">'+micHint+'</div>'
+    +'</div>'
+    +txArea+procHTML
+    +'</div>'
+    +'<div class="card"><div style="font-size:11px;font-weight:800;color:#8A9BB0;text-transform:uppercase;margin-bottom:10px">Or tap an example</div>'+exHTML+'</div>'
+    +'<div class="opay-banner"><div><div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase">Linked With</div><div style="font-size:20px;font-weight:900;color:#fff">&#x1F3E6; OPay</div><div style="font-size:12px;color:rgba(255,255,255,.75)">Tap to open your wallet</div></div><button class="opay-open" onclick="opayGo()">Open &rarr;</button></div>'
+    +rptBtn;
+}
+
+/* === RENDER LEDGER === */
+function renderLedger(){
+  var p=document.getElementById('pg-ledger');
+  if(!p)return;
+  if(!txns.length){
+    p.innerHTML='<div class="sec-title">Transaction Ledger</div><div class="empty"><div class="empty-icon">&#x1F4D2;</div><div style="font-weight:700;font-size:16px">No transactions yet</div><div style="font-size:13px;margin-top:6px">Go to Record and speak your first sale</div></div>';
+    return;
+  }
+  var inc=txns.filter(function(t){return t.type==='INCOME';}).reduce(function(s,t){return s+t.amount;},0);
+  var exp=txns.filter(function(t){return t.type==='EXPENSE';}).reduce(function(s,t){return s+t.amount;},0);
+  var items=txns.map(function(t){
+    var col=t.type==='INCOME'?'#2DC653':'#E63946';
+    var cls=t.type==='INCOME'?'inc':'exp';
+    var sign=t.type==='INCOME'?'+':'-';
+    return '<div class="tx-item '+cls+'">'
+      +'<div class="tx-row"><div style="flex:1;min-width:0"><div class="tx-desc">'+esc(t.desc)+'</div><div class="tx-meta">'+esc(t.cat)+' &bull; '+esc(t.date)+'</div></div>'
+      +'<div class="tx-amt" style="color:'+col+'">'+sign+''+fmtN(t.amount)+'</div></div>'
+      +'<div class="tx-raw">&ldquo;'+esc(t.raw)+'&rdquo;</div></div>';
+  }).join('');
+  p.innerHTML='<div class="sec-title">Transaction Ledger</div>'
+    +'<div class="stats3">'
+    +'<div class="stat-box"><div class="stat-lbl">Income</div><div class="stat-val" style="color:#2DC653">'+fmtN(inc)+'</div></div>'
+    +'<div class="stat-box"><div class="stat-lbl">Expense</div><div class="stat-val" style="color:#E63946">'+fmtN(exp)+'</div></div>'
+    +'<div class="stat-box"><div class="stat-lbl">Profit</div><div class="stat-val" style="color:#00A896">'+fmtN(inc-exp)+'</div></div>'
+    +'</div>'+items
+    +'<button class="btn" style="background:#E63946;color:#fff;margin-top:8px;width:auto;padding:10px 20px" onclick="clearAll()">&#x1F5D1; Clear All</button>';
+}
+function clearAll(){if(!confirm('Clear all transactions?'))return;txns=[];save();lastTx=null;report=null;renderLedger();toast('Records cleared','#E63946');}
+
+/* === RENDER STOCK === */
+function renderStock(){
+  var p=document.getElementById('pg-stock');
+  if(!p)return;
+  p.innerHTML='<div class="sec-title">Stock Inventory</div>'
+    +'<div style="font-size:12px;color:#8A9BB0;margin-bottom:14px">Auto-tracked from voice transactions</div>';
+  if(!stock.length){
+    p.innerHTML+='<div class="empty"><div class="empty-icon">&#x1F4E6;</div><div style="font-weight:700">No stock yet</div><div style="font-size:13px;margin-top:6px">Record sales and purchases to track inventory</div></div>';
+  } else {
+    var items=stock.map(function(s){
+      return '<div class="tx-item">'
+        +'<div class="tx-row"><div style="font-size:14px;font-weight:700">'+esc(s.cat)+'</div>'
+        +'<div><div style="font-size:14px;font-weight:700;color:#00A896">'+fmtN(s.rev||0)+'</div><div style="font-size:11px;color:#8A9BB0">Revenue</div></div></div>'
+        +'<div style="display:flex;gap:16px;margin-top:8px">'
+        +'<div><span style="font-size:11px;color:#8A9BB0">Cost: </span><span style="font-size:12px;font-weight:700;color:#E63946">'+fmtN(s.cost||0)+'</span></div>'
+        +'<div><span style="font-size:11px;color:#8A9BB0">Sold: </span><span style="font-size:12px;font-weight:700">'+esc(String(s.sold||0))+'</span></div>'
+        +'<div><span style="font-size:11px;color:#8A9BB0">Added: </span><span style="font-size:12px">'+esc(s.added||'-')+'</span></div>'
+        +'</div></div>';
+    }).join('');
+    p.innerHTML+=items;
+  }
+  p.innerHTML+='<div class="divider"></div>'
+    +'<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:12px">Add Stock Manually</div>'
+    +'<label class="calc-lbl">Item Name</label><input type="text" class="calc-inp" id="st-name" placeholder="e.g. Rice, Fabric"/>'
+    +'<div class="stats2" style="gap:8px;margin-bottom:8px">'
+    +'<div><label class="calc-lbl">Cost (&#x20a6;)</label><input type="number" class="calc-inp" id="st-cost" placeholder="5000" style="margin-bottom:0"/></div>'
+    +'<div><label class="calc-lbl">Quantity</label><input type="number" class="calc-inp" id="st-qty" placeholder="10" style="margin-bottom:0"/></div>'
+    +'</div>'
+    +'<button class="btn btn-teal" onclick="addStock()" style="margin-top:10px">+ Add Stock</button>'
+    +'</div>';
+}
+function addStock(){
+  var name=(document.getElementById('st-name').value||'').trim();
+  var cost=parseFloat(document.getElementById('st-cost').value)||0;
+  var qty=parseInt(document.getElementById('st-qty').value)||0;
+  if(!name){toast('Enter item name','#F4A261');return;}
+  var i=stock.findIndex(function(s){return s.cat.toLowerCase()===name.toLowerCase();});
+  if(i>=0){stock[i].qty=(stock[i].qty||0)+qty;stock[i].cost=(stock[i].cost||0)+cost;}
+  else{stock.push({cat:name,qty:qty,rev:0,cost:cost,sold:0,added:dateStr()});}
+  save();renderStock();toast(name+' added','#00A896');
+}
+
+/* === RENDER REPORT === */
+function doReport(){
+  if(!txns.length){toast('Add transactions first','#F4A261');return;}
+  report=buildReport();goTab('report');
+}
+function renderReport(){
+  var p=document.getElementById('pg-report');
+  if(!p)return;
+  if(!report){
+    p.innerHTML='<div class="sec-title">Weekly Report</div><div class="empty"><div class="empty-icon">&#x1F4CA;</div><div style="font-weight:700">No report yet</div><div style="font-size:13px;margin-top:6px">Add transactions then tap Generate</div><button class="btn btn-teal" style="margin-top:20px;width:auto;padding:12px 28px" onclick="goTab(\'home\')">&#x2190; Go Record</button></div>';
+    return;
+  }
+  var r=report;
+  var kpi='<div class="stats2">'
+    +'<div class="stat-box"><div style="font-size:18px">&#x2B06;</div><div class="stat-lbl" style="margin-top:4px">Income</div><div class="stat-val" style="color:#2DC653">'+fmtN(r.inc)+'</div></div>'
+    +'<div class="stat-box"><div style="font-size:18px">&#x2B07;</div><div class="stat-lbl" style="margin-top:4px">Expenses</div><div class="stat-val" style="color:#E63946">'+fmtN(r.exp)+'</div></div>'
+    +'<div class="stat-box"><div style="font-size:18px">&#x1F4B0;</div><div class="stat-lbl" style="margin-top:4px">Profit</div><div class="stat-val" style="color:#00A896">'+fmtN(r.profit)+'</div></div>'
+    +'<div class="stat-box"><div style="font-size:18px">&#x1F4C8;</div><div class="stat-lbl" style="margin-top:4px">Margin</div><div class="stat-val" style="color:#F4A261">'+r.margin+'%</div></div>'
+    +'</div>';
+
+  var cats=r.cats;
+  var maxV=1;
+  Object.values(cats).forEach(function(v){if(v>maxV)maxV=v;});
+  var bars='<div class="chart-wrap"><div style="font-size:13px;font-weight:800;margin-bottom:12px">Sales by Category</div>'
+    +Object.entries(cats).sort(function(a,b){return b[1]-a[1];}).slice(0,7).map(function(e){
+      var pct=Math.round(e[1]/maxV*100);
+      return '<div class="bar-row"><div class="bar-lbl">'+esc(e[0])+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><div class="bar-val">'+fmtN(e[1])+'</div></div>';
+    }).join('')+'</div>';
+
+  var advice='<div class="info-box"><div style="font-size:12px;font-weight:800;color:#00A896;margin-bottom:6px">&#x1F916; AI ADVICE</div>'
+    +'<div style="font-size:14px;line-height:1.5">'+esc(r.advice)+'</div>'
+    +'<div style="font-size:13px;font-style:italic;margin-top:8px;border-top:1px solid #00A896;padding-top:8px">&#x1F1F3;&#x1F1EC; '+esc(r.hausa)+'</div></div>';
+
+  var loanBg=r.elig?'linear-gradient(135deg,#007B2E,#00C853)':'#F2F6F8';
+  var loanTitleCol=r.elig?'#fff':'#8A9BB0';
+  var loanSubCol=r.elig?'rgba(255,255,255,.7)':'#8A9BB0';
+  var loanTitle=r.elig?'OPay LOAN ELIGIBLE &#x2705;':'KEEP RECORDING &#x1F4DD;';
+  var loanSub=r.elig?'You qualify for an OPay micro-loan':'Build 90 days of records to unlock';
+  var loanAmtHTML=r.elig?'<div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:rgba(255,255,255,.6)">Pre-qualified</div><div style="font-size:22px;font-weight:900;color:#fff">'+fmtN(r.loan)+'</div></div>':'';
+  var loanApplyHTML=r.elig?'<button onclick="opayGo(\'loan\')" style="margin-top:12px;width:100%;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">Apply on OPay &rarr;</button>':'';
+  var loan='<div class="loan-card" style="background:'+loanBg+'">'
+    +'<div class="loan-row"><div style="font-size:30px">'+(r.elig?'&#x1F3E6;':'&#x1F4C8;')+'</div>'
+    +'<div><div style="font-size:13px;font-weight:800;color:'+loanTitleCol+'">'+loanTitle+'</div>'
+    +'<div style="font-size:12px;color:'+loanSubCol+';margin-top:2px">'+loanSub+'</div></div>'
+    +loanAmtHTML+'</div>'
+    +'<div class="loan-bar-track"><div class="loan-bar-fill" style="width:'+r.score+'%"></div></div>'
+    +'<div style="font-size:11px;color:'+loanSubCol+';margin-top:5px;text-align:right">Credit Score: '+r.score+'/100</div>'
+    +loanApplyHTML+'</div>';
+
+  p.innerHTML='<div class="sec-title">Weekly Report</div>'+kpi+bars+advice+loan
+    +'<div style="text-align:center;color:#8A9BB0;font-size:12px;padding-bottom:8px">Powered by AI + Canva + OPay &bull; Team Unique-UNIMAID</div>';
+}
+
+/* === RENDER MORE === */
+function renderMore(){
+  var p=document.getElementById('pg-more');
+  if(!p)return;
+  p.innerHTML='<div class="sec-title">More Tools</div>'
+    +'<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:12px">&#x1F3E6; OPay Services</div>'
+    +'<div class="svc-grid">'
+    +'<div class="svc-box" onclick="opayGo(\'transfer\')"><div class="svc-icon">&#x1F4B8;</div><div class="svc-title">Transfer</div><div class="svc-desc">Send money</div></div>'
+    +'<div class="svc-box" onclick="opayGo(\'loan\')"><div class="svc-icon">&#x1F4B0;</div><div class="svc-title">Loans</div><div class="svc-desc">Micro-finance</div></div>'
+    +'<div class="svc-box" onclick="opayGo(\'savings\')"><div class="svc-icon">&#x1F3E6;</div><div class="svc-title">Savings</div><div class="svc-desc">Earn interest</div></div>'
+    +'<div class="svc-box" onclick="opayGo(\'bills\')"><div class="svc-icon">&#x1F4C4;</div><div class="svc-title">Bills</div><div class="svc-desc">Pay utilities</div></div>'
+    +'<div class="svc-box" onclick="opayGo(\'airtime\')"><div class="svc-icon">&#x1F4F2;</div><div class="svc-title">Airtime</div><div class="svc-desc">Top up</div></div>'
+    +'<div class="svc-box" onclick="opayGo()"><div class="svc-icon">&#x2795;</div><div class="svc-title">More</div><div class="svc-desc">Open OPay</div></div>'
+    +'</div></div>'
+
+    +'<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:12px">&#x1F9EE; Profit Calculator</div>'
+    +'<label class="calc-lbl">Selling Price (&#x20a6;)</label><input type="number" class="calc-inp" id="c-sell" placeholder="0" oninput="calcProfit()"/>'
+    +'<label class="calc-lbl">Cost Price (&#x20a6;)</label><input type="number" class="calc-inp" id="c-cost" placeholder="0" oninput="calcProfit()"/>'
+    +'<label class="calc-lbl">Quantity</label><input type="number" class="calc-inp" id="c-qty" placeholder="1" oninput="calcProfit()"/>'
+    +'<div class="calc-res" id="calc-res"></div></div>'
+
+    +'<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:12px">&#x1F3E6; OPay Loan Checker</div>'
+    +'<label class="calc-lbl">Monthly Sales (&#x20a6;)</label><input type="number" class="calc-inp" id="l-sales" placeholder="50000" oninput="calcLoan()"/>'
+    +'<label class="calc-lbl">Months of Records</label><input type="number" class="calc-inp" id="l-months" placeholder="3" oninput="calcLoan()"/>'
+    +'<div id="loan-res"></div></div>'
+
+    +'<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:6px">&#x1F3AC; Video Script Teleprompter</div>'
+    +'<div style="font-size:12px;color:#8A9BB0;margin-bottom:12px">For your 3-minute NICA pitch video</div>'
+    +'<div id="tele-area"></div></div>'
+
+    +'<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:6px">&#x1F5A5; Presentation Mode</div>'
+    +'<div style="font-size:12px;color:#8A9BB0;margin-bottom:12px">Fullscreen slides for judges</div>'
+    +'<button class="btn btn-dark" onclick="launchPres()">&#x1F680; Launch Fullscreen Presentation</button></div>';
+
+  renderTele();
+}
+
+/* === CALCULATOR === */
+function calcProfit(){
+  var sell=parseFloat(document.getElementById('c-sell').value)||0;
+  var cost=parseFloat(document.getElementById('c-cost').value)||0;
+  var qty=parseFloat(document.getElementById('c-qty').value)||1;
+  var el=document.getElementById('calc-res');
+  if(!el)return;
+  if(!sell&&!cost){el.style.display='none';return;}
+  var unit=sell-cost;var total=unit*qty;var margin=sell>0?Math.round((unit/sell)*100):0;
+  el.style.display='block';
+  el.innerHTML='<div class="calc-row"><span style="font-size:13px;font-weight:600">Unit Profit</span><span style="font-size:15px;font-weight:900;color:'+(unit>=0?'#2DC653':'#E63946')+'">'+fmtN(unit)+'</span></div>'
+    +'<div class="calc-row"><span style="font-size:13px;font-weight:600">Total Revenue</span><span style="font-size:15px;font-weight:900">'+fmtN(sell*qty)+'</span></div>'
+    +'<div class="calc-row"><span style="font-size:13px;font-weight:600">Total Profit</span><span style="font-size:15px;font-weight:900;color:'+(total>=0?'#2DC653':'#E63946')+'">'+fmtN(total)+'</span></div>'
+    +'<div class="calc-row"><span style="font-size:13px;font-weight:600">Profit Margin</span><span style="font-size:15px;font-weight:900;color:#F4A261">'+margin+'%</span></div>';
+}
+
+function calcLoan(){
+  var sales=parseFloat(document.getElementById('l-sales').value)||0;
+  var months=parseFloat(document.getElementById('l-months').value)||0;
+  var el=document.getElementById('loan-res');
+  if(!el)return;
+  if(!sales||!months){el.innerHTML='';return;}
+  var score=clamp(Math.floor(months*12+(sales>50000?20:sales>20000?10:0)+(months>=3?15:0)),0,100);
+  var elig=score>=50;
+  var maxLoan=elig?Math.floor(sales*2.5/1000)*1000:0;
+  var bg=elig?'linear-gradient(135deg,#007B2E,#00C853)':'#F2F6F8';
+  var tc=elig?'#fff':'#8A9BB0';
+  var sc=elig?'rgba(255,255,255,.6)':'#8A9BB0';
+  el.innerHTML='<div class="loan-card" style="background:'+bg+';margin-bottom:0">'
+    +'<div class="loan-row"><div style="font-size:28px">'+(elig?'&#x1F3E6;':'&#x1F4C8;')+'</div>'
+    +'<div><div style="font-size:13px;font-weight:800;color:'+tc+'">'+(elig?'ELIGIBLE &#x2705;':'NOT YET ELIGIBLE')+'</div><div style="font-size:12px;color:'+sc+';margin-top:2px">Score: '+score+'/100</div></div>'
+    +(elig?'<div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:rgba(255,255,255,.6)">Max Loan</div><div style="font-size:20px;font-weight:900;color:#fff">'+fmtN(maxLoan)+'</div></div>':'')
+    +'</div>'
+    +'<div class="loan-bar-track"><div class="loan-bar-fill" style="width:'+score+'%"></div></div>'
+    +(elig?'<button onclick="opayGo(\'loan\')" style="margin-top:12px;width:100%;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">Apply on OPay &rarr;</button>':'<div style="font-size:12px;color:#8A9BB0;margin-top:8px">Record at least 3 months to qualify</div>')
+    +'</div>';
+}
+
+/* === TELEPROMPTER === */
+function renderTele(){
+  var el=document.getElementById('tele-area');
+  if(!el)return;
+  var seg=SCRIPTS[scriptSeg];
+  var total=seg.lines.length;
+  var pct=Math.round(((scriptLine+1)/total)*100);
+  var segBtns=SCRIPTS.map(function(s,i){
+    return '<button class="seg-btn'+(i===scriptSeg?' on':'')+'" onclick="setSeg('+i+')">'+s.lbl+'</button>';
+  }).join('');
+  var lines=seg.lines.map(function(l,i){
+    var act=i===scriptLine;var past=i<scriptLine;
+    return '<div class="p-line" style="font-size:'+(act?'18px':'12px')+';font-weight:'+(act?900:400)+';color:'+(act?'#00A896':past?'rgba(255,255,255,.18)':'rgba(255,255,255,.5)')+';">'+(act?'&#x25B6; ':'')+esc(l)+'</div>';
+  }).join('');
+  var spdBtns=[['Slow',5000],['Normal',3500],['Fast',2200]].map(function(s){
+    return '<button class="spd-btn'+(scriptSpeed===s[1]?' on':'')+'" onclick="setSpd('+s[1]+')">'+s[0]+'</button>';
+  }).join('');
+  el.innerHTML='<div class="seg-bar">'+segBtns+'</div>'
+    +'<div style="background:#F4A261;color:#fff;border-radius:20px;padding:4px 14px;display:inline-block;font-size:12px;font-weight:700;margin-bottom:12px">&#x23F1; '+esc(seg.time)+'</div>'
+    +'<div class="prompter">'+lines+'</div>'
+    +'<div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:'+pct+'%"></div></div><span style="font-size:12px;color:#8A9BB0;font-weight:700;flex-shrink:0">'+(scriptLine+1)+'/'+total+'</span></div>'
+    +'<div class="ctrl-row">'
+    +'<button class="ctrl-btn" style="background:#fff;border:1.5px solid #D4E4E9" onclick="sPrev()">&#x2B05;</button>'
+    +'<button class="ctrl-btn" style="background:'+(scriptRun?'#E63946':'#00A896')+';color:#fff" onclick="sToggle()">'+(scriptRun?'&#x23F8;':'&#x25B6;')+'</button>'
+    +'<button class="ctrl-btn" style="background:#fff;border:1.5px solid #D4E4E9" onclick="sNext()">&#x27A1;</button>'
+    +'</div>'
+    +'<div class="card" style="margin-bottom:8px"><div class="tips-title">Speed</div><div class="spd-row">'+spdBtns+'</div></div>'
+    +'<button class="btn btn-outline" onclick="sReset()" style="margin-top:4px;margin-bottom:0">&#x1F504; Reset</button>';
+}
+function setSeg(i){scriptSeg=i;scriptLine=0;sReset();}
+function sReset(){scriptRun=false;scriptLine=0;clearInterval(scriptTimer);renderTele();}
+function sPrev(){scriptLine=Math.max(0,scriptLine-1);renderTele();}
+function sNext(){scriptLine=Math.min(SCRIPTS[scriptSeg].lines.length-1,scriptLine+1);renderTele();}
+function setSpd(s){scriptSpeed=s;renderTele();}
+function sToggle(){
+  if(scriptRun){clearInterval(scriptTimer);scriptRun=false;}
+  else{scriptRun=true;scriptTimer=setInterval(function(){
+    var tot=SCRIPTS[scriptSeg].lines.length;
+    if(scriptLine+1>=tot){clearInterval(scriptTimer);scriptRun=false;}else{scriptLine++;}
+    renderTele();
+  },scriptSpeed);}
+  renderTele();
+}
+
+/* === PRESENTATION === */
+function sCover(){return '<div class="sc"><div style="font-size:62px;animation:float 3s ease-in-out infinite;margin-bottom:10px">&#x1F6D2;</div><div style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:8px">Shop<span style="color:#00A896">Ledger</span></div><div style="font-size:14px;color:rgba(255,255,255,.75);margin-bottom:22px;line-height:1.6">Voice-Powered AI Bookkeeping<br>for Nigerian Market Traders</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:22px"><span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700">&#x1F916; Gemini AI</span><span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700">&#x1F3A8; Canva</span><span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700">&#x1F3E6; OPay</span></div><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">Team Unique-UNIMAID &bull; University of Maiduguri &bull; OPay NICA 2026</div></div>';}
+function sProb(){return '<div class="sl"><div class="s-tag" style="color:#F4A261">The Problem</div><div class="s-title">39M traders.<br><span style="color:#E63946">Zero records.</span></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:11px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 13px;border-left:3px solid #E63946"><span style="font-size:22px">&#x1F4CA;</span><div><div style="font-size:19px;font-weight:900;color:#F4A261">90%</div><div style="font-size:12px;color:rgba(255,255,255,.65)">of traders keep NO financial records</div></div></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:11px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 13px;border-left:3px solid #E63946"><span style="font-size:22px">&#x1F3E6;</span><div><div style="font-size:19px;font-weight:900;color:#F4A261">38M+</div><div style="font-size:12px;color:rgba(255,255,255,.65)">Nigerians excluded from bank loans</div></div></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:11px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 13px;border-left:3px solid #E63946"><span style="font-size:22px">&#x1F4AC;</span><div><div style="font-size:19px;font-weight:900;color:#F4A261">60%</div><div style="font-size:12px;color:rgba(255,255,255,.65)">cannot use English-only apps</div></div></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:0;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 13px;border-left:3px solid #E63946"><span style="font-size:22px">&#x1F4B8;</span><div><div style="font-size:19px;font-weight:900;color:#F4A261">&#x20a6;28T</div><div style="font-size:12px;color:rgba(255,255,255,.65)">informal sector invisible to banks</div></div></div></div>';}
+function sSol(){return '<div class="sl"><div class="s-tag" style="color:#00A896">The Solution</div><div class="s-title">Her voice is<br><span style="color:#00A896">her ledger.</span></div><div class="s-step"><div class="s-step-num">1</div><div class="s-step-body"><div class="s-step-title">&#x1F399; Speak</div><div class="s-step-desc">Hausa, Yoruba, Igbo or English</div></div></div><div class="s-step"><div class="s-step-num">2</div><div class="s-step-body"><div class="s-step-title">&#x1F916; AI Processes</div><div class="s-step-desc">Classifies, updates stock, detects patterns</div></div></div><div class="s-step"><div class="s-step-num">3</div><div class="s-step-body"><div class="s-step-title">&#x1F3A8; Canva Report</div><div class="s-step-desc">Auto-generates professional P&amp;L infographic</div></div></div><div class="s-step"><div class="s-step-num">4</div><div class="s-step-body"><div class="s-step-title">&#x1F3E6; OPay Loan</div><div class="s-step-desc">90-day history unlocks micro-loan access</div></div></div></div>';}
+function sDemo(){return '<div class="sc"><div class="s-tag" style="color:#00A896">Live Demo</div><div class="s-title">Watch it <span style="color:#00A896">work.</span></div><div style="background:rgba(0,168,150,.1);border:2px solid #00A896;border-radius:16px;padding:16px;margin-bottom:18px;text-align:left"><div style="font-size:11px;color:#00A896;font-weight:800;margin-bottom:6px">VOICE INPUT</div><div style="font-size:14px;color:#fff;font-style:italic;line-height:1.6">&ldquo;Na sayar da jakunkuna uku na shinkafa &mdash; Naira dubu goma sha biyar&rdquo;</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:6px">&rarr; I sold 3 bags of rice for &#x20a6;15,000</div></div><button onclick="closePres();goTab(\'home\')" style="background:#00A896;color:#fff;border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">&#x1F399; Open Live Demo</button></div>';}
+function sImpact(){return '<div class="sl"><div class="s-tag" style="color:#2DC653">Impact</div><div class="s-title">Nigeria. Africa.<br><span style="color:#2DC653">The World.</span></div><div class="s-stat-grid"><div class="s-stat-box"><div class="s-stat-val" style="color:#00A896">50,000</div><div class="s-stat-lbl">Traders Year 1</div></div><div class="s-stat-box"><div class="s-stat-val" style="color:#2DC653">&#x20a6;500M</div><div class="s-stat-lbl">Loans facilitated</div></div><div class="s-stat-box"><div class="s-stat-val" style="color:#F4A261">60%</div><div class="s-stat-lbl">Female traders</div></div><div class="s-stat-box"><div class="s-stat-val" style="color:#9B5DE5">400M</div><div class="s-stat-lbl">Africa opportunity</div></div></div><div class="s-check"><span style="color:#2DC653">&#x2713;</span>Aligns with CBN Financial Inclusion Strategy</div><div class="s-check"><span style="color:#2DC653">&#x2713;</span>Supports SDG 8 &mdash; Decent Work &amp; Economic Growth</div><div class="s-check"><span style="color:#2DC653">&#x2713;</span>Scalable to all 54 African countries</div></div>';}
+function sOpay(){return '<div class="sc"><div style="font-size:44px;margin-bottom:8px">&#x1F3E6;</div><div class="s-tag" style="color:#7FFFD4">OPay Integration</div><div class="s-title">ShopLedger +<br><span style="color:#00C853">OPay</span> = Freedom</div><div class="s-svc"><span style="font-size:20px">&#x1F4B3;</span><div><div style="font-size:13px;font-weight:800;color:#fff">Wallet Sync</div><div style="font-size:11px;color:rgba(255,255,255,.6)">OPay payments auto-imported</div></div></div><div class="s-svc"><span style="font-size:20px">&#x1F4C8;</span><div><div style="font-size:13px;font-weight:800;color:#fff">Credit Score</div><div style="font-size:11px;color:rgba(255,255,255,.6)">90-day history builds eligibility</div></div></div><div class="s-svc"><span style="font-size:20px">&#x1F4B0;</span><div><div style="font-size:13px;font-weight:800;color:#fff">Micro-Loans</div><div style="font-size:11px;color:rgba(255,255,255,.6)">Up to &#x20a6;500,000 unlocked</div></div></div><button onclick="opayGo()" style="margin-top:10px;width:100%;background:#00C853;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">Open OPay App &rarr;</button></div>';}
+function sTeam(){return '<div class="sc"><div class="s-tag" style="color:#B8A9FF">The Team</div><div style="font-size:25px;font-weight:900;color:#fff;margin-bottom:4px">Team <span style="color:#B8A9FF">Unique</span>-UNIMAID</div><div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:14px">University of Maiduguri</div><div class="s-team-row"><span style="font-size:20px">&#x1F468;&#x200D;&#x1F4BB;</span><div style="font-size:13px;color:#fff;font-weight:600">Ibrahim &mdash; Team Lead &amp; Developer</div></div><div class="s-team-row"><span style="font-size:20px">&#x1F4CA;</span><div style="font-size:13px;color:#fff;font-weight:600">Abubakar &mdash; Data Analyst</div></div><div class="s-team-row"><span style="font-size:20px">&#x1F4BC;</span><div style="font-size:13px;color:#fff;font-weight:600">Abdulrahman &mdash; Business Development</div></div><div class="s-team-row"><span style="font-size:20px">&#x1F3A8;</span><div style="font-size:13px;color:#fff;font-weight:600">Aminat &mdash; Product Designer</div></div><div class="s-team-row"><span style="font-size:20px">&#x1F50D;</span><div style="font-size:13px;color:#fff;font-weight:600">Khadijah &mdash; Finance &amp; Research</div></div><div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.5);font-style:italic">&ldquo;We are not building FOR Nigerians. We ARE Nigerians building for ourselves.&rdquo;</div></div>';}
+function sClose(){return '<div class="sc"><div style="font-size:58px;animation:float 3s ease-in-out infinite;margin-bottom:10px">&#x1F6D2;</div><div style="font-size:34px;font-weight:900;color:#fff;margin-bottom:10px">Shop<span style="color:#00A896">Ledger</span></div><div style="font-size:16px;color:rgba(255,255,255,.75);font-style:italic;margin-bottom:14px">&ldquo;Her voice. Her ledger. Her future.&rdquo;</div><div style="width:48px;height:3px;background:#00A896;margin:0 auto 16px;border-radius:2px"></div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:20px">Powered by Gemini AI + Canva + OPay</div><button onclick="opayGo()" style="width:100%;background:#00C853;color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px;font-family:inherit">&#x1F3E6; Connect to OPay Now</button><div style="font-size:11px;color:rgba(255,255,255,.35)">Team Unique-UNIMAID &bull; OPay NICA 2026</div></div>';}
+
+var SLIDES=[
+  {bg:'linear-gradient(135deg,#003049,#00535E,#00A896)',fn:sCover},
+  {bg:'linear-gradient(135deg,#1a0000,#3D0000)',fn:sProb},
+  {bg:'linear-gradient(135deg,#003049,#005566)',fn:sSol},
+  {bg:'linear-gradient(135deg,#002233,#003049)',fn:sDemo},
+  {bg:'linear-gradient(135deg,#0a2200,#003049)',fn:sImpact},
+  {bg:'linear-gradient(135deg,#003820,#007A54)',fn:sOpay},
+  {bg:'linear-gradient(135deg,#1a0a3d,#003049)',fn:sTeam},
+  {bg:'linear-gradient(135deg,#003049,#00A896)',fn:sClose}
+];
+
+function launchPres(){slideIdx=0;renderSlide();document.getElementById('pres').classList.add('show');}
+function closePres(){document.getElementById('pres').classList.remove('show');}
+
+function renderSlide(){
+  var S=SLIDES[slideIdx];
+  var body=document.getElementById('slide-body');
+  var dots=document.getElementById('slide-dots');
+  var ctrl=document.getElementById('pres-ctrl');
+  body.style.background=S.bg;
+  body.innerHTML=S.fn();
+  dots.innerHTML=SLIDES.map(function(_,i){
+    return '<div class="dot'+(i===slideIdx?' on':'')+'" style="width:'+(i===slideIdx?22:8)+'px" onclick="goSlide('+i+')"></div>';
+  }).join('');
+  var total=SLIDES.length;
+  ctrl.innerHTML='<button onclick="closePres()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:13px;padding:8px 12px">&#x2715;</button>'
+    +'<button onclick="goSlide('+(slideIdx-1)+')" '+(slideIdx===0?'disabled':'')+' style="flex:1;background:'+(slideIdx===0?'rgba(255,255,255,.05)':'rgba(255,255,255,.15)')+';color:'+(slideIdx===0?'rgba(255,255,255,.25)':'#fff')+';font-size:20px;padding:10px">&#x2190;</button>'
+    +'<div style="color:#fff;font-size:13px;font-weight:700;min-width:48px;text-align:center">'+(slideIdx+1)+'/'+total+'</div>'
+    +'<button onclick="goSlide('+(slideIdx+1)+')" '+(slideIdx===total-1?'disabled':'')+' style="flex:1;background:'+(slideIdx===total-1?'rgba(255,255,255,.05)':'#00A896')+';color:'+(slideIdx===total-1?'rgba(255,255,255,.25)':'#fff')+';font-size:20px;padding:10px">&#x2192;</button>'
+    +'<button onclick="opayGo()" style="background:#00C853;color:#fff;font-size:12px;font-weight:800;padding:8px 10px">&#x1F3E6;</button>';
+}
+
+function goSlide(n){
+  if(n<0||n>=SLIDES.length||slideFade)return;
+  slideFade=true;
+  var body=document.getElementById('slide-body');
+  body.classList.add('fade');
+  setTimeout(function(){slideIdx=n;renderSlide();body.classList.remove('fade');slideFade=false;},220);
+}
+
+document.addEventListener('keydown',function(e){
+  var pres=document.getElementById('pres');
+  if(!pres.classList.contains('show'))return;
+  if(e.key==='ArrowRight')goSlide(slideIdx+1);
+  if(e.key==='ArrowLeft')goSlide(slideIdx-1);
+  if(e.key==='Escape')closePres();
+});
+
+/* === INIT === */
+renderHome();
+</script>
+</body>
+</html>
