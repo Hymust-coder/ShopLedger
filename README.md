@@ -1,6 +1,6 @@
 ShopLedger — OPay NICA 2026 🛒
 
-🚀 Live Interactive App URL for Judges & Examiners:
+🚀 Live Interactive App URL:
 👉 [LAUNCH SHOPLEDGER LIVE PROTOTYPE](https://github.com/Hymust-coder/ShopLedger.git)
 
 📌 Project Overview
