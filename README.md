@@ -12,7 +12,7 @@ Follow these sequential steps on the live link to experience the full features o
 
 1. Test Voice & Speech Logic (`Record` Tab)
 Select a Language: Use the horizontal language scroll bar at the top to select your preferred language (e.g., English or Hausa).
-Test Real Microphone (Google Chrome Recommended on laptop): Click the large teal mic button. Speak a trade phrase naturally (e.g., "I sold 3 bags of rice for 15,000 naira"). Tap the button again to stop recording, view the text extraction, and click ✅ Save Transaction.
+Test Real Microphone (Google Chrome Recommended): Click the large teal mic button. Speak a trade phrase naturally (e.g., "I sold 3 bags of rice for 15,000 naira"). Tap the button again to stop recording, view the text extraction, and click ✅ Save Transaction.
 Test Clickable Examples: If microphone permissions are unavailable, scroll down and tap any of our preset market phrases under "Or tap an example below".
 Observe Smart AI Extraction: Notice how our algorithm instantly categorizes the phrase into standard accounting sheets, assigns high/medium confidence metrics, and formats currency records automatically.
 
